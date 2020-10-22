@@ -21,7 +21,7 @@ function pullIncidentTable () {
 }
 
 function createIncidentTicket () {
-
+    
 }
 
 module.exports = {pullIncidentTable, createIncidentTicket}
