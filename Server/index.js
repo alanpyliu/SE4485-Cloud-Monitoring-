@@ -1,27 +1,35 @@
-// index.js
-const http = require('http');
-const serviceNow = require('./serviceNow')
-const fs = require('fs')
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+const port = 8080
 
-// declare server variables
-const hostname = '127.0.0.1';
-const port = 8080;
+app.use(bodyParser.urlencoded({ extended: false}))
 
-const server = http.createServer((req, res) => {
-
-  console.log("Got request")
-//   var body = '';
-//   req.on('data', (chunk) => {
-//     body += chunk;
+// app.get('/', (req, res) => {
+//   console.log('Received get request')
+//   var data='';
+//   req.setEncoding('utf8');
+//   req.on('data', function(chunk) { 
+//      data += chunk;
 //   });
 
-//   req.on('end', () => {
-//     fs.writeFile('file.json', body, 'utf8');
-//     res.end('{"msg": "OK"}');
+//   req.on('end', function() {
+//       console.log(data)
+//   });
 // })
-  console.log(req)
-  // res.statusCode = 200;
-  // res.setHeader('Content-Type', 'text/plain');
-  // res.end('Hello World\n');
-  //console.log('test');
-}).listen(port);
+app.post('/', (req, res) => {
+  console.log('Received post request')
+  var data='';
+  req.setEncoding('utf8');
+  req.on('data', function(chunk) { 
+     data += chunk;
+  });
+
+  req.on('end', function() {
+      console.log(data)
+  });
+})
+
+app.listen(port, () => {
+  console.log('Server is on port ' + port)
+})
