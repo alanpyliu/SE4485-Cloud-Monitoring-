@@ -1,16 +1,18 @@
-const axios = require('axios')
-const url = 'https://dev63377.service-now.com/api/now/table/incident?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_fields=number%2Cshort_description'
+const axios = require('axios');
+const geturl = 'https://dev99907.service-now.com/api/now/table/incident?sysparm_limit=1';
+const url = 'https://dev99907.service-now.com/api/now/table/incident';
+const btoa = require('btoa');
 
 const user = 'admin'
-const pwd = 'Winter2020@#'
+const pwd = 'Summer2020'
 
 function pullIncidentTable () {
-    axios.post(url,
+    axios.get(geturl,
         {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': 'Basic ' + Buffer.from(user + ':' + pwd).toString('base64'),
+                'Authorization': 'Basic ' + Buffer.from(user + ':' + pwd)
             }
         }).then((response) => {
             console.log(response)
@@ -21,7 +23,26 @@ function pullIncidentTable () {
 }
 
 function createIncidentTicket () {
-
+    axios(url,
+        {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Basic ' + btoa(user + ':' + pwd),
+            },
+            data: {
+                'short_description': 'Alarm is going off - demo for Chandra'
+            }
+        }).then((response) => {
+            console.log(response)
+        })
+        .catch((error) => {
+            console.log("==================== ERROR ====================", error);
+        })
 }
+//pullIncidentTable()
+//createIncidentTicket()
 
 module.exports = {pullIncidentTable, createIncidentTicket}

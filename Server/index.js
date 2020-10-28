@@ -1,20 +1,65 @@
-// index.js
-const http = require('http');
-const serviceNow = require('./serviceNow')
+const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
+const serviceNow = require('./serviceNow');
+const localtunnel = require('localtunnel');
+const app = express();
+const localPort = 8080;
 
-// declare server variables
-//const hostname = '127.0.0.1';
-//const port = 8080;
+app.use(bodyParser.urlencoded({ extended: false}))
 
-const server = http.createServer((req, res) => {
-  req.on('data', (data) => {
-    console.log("Received a notification");
-    console.log("test");
-    console.log(data);
-  })
+app.get('/', (req, res) => {
+  console.log('Received get request')
+  
+  let data='';
+  req.setEncoding('utf8');
+  req.on('data', function(chunk) { 
+     data += chunk;
+  });
 
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-}).listen(8080); 
-// hello zach
+  req.on('end', function() {
+    let response = JSON.parse(data)
+    console.log(response)
+  });
+})
+
+app.post('/', (req, res) => {
+  console.log('Received post request')
+  
+  let data='';
+  req.setEncoding('utf8');
+  req.on('data', function(chunk) { 
+     data += chunk;
+  });
+
+  req.on('end', function() {
+    let response = JSON.parse(data)
+    console.log(response)
+
+    if(response.NewStateValue === 'ALARM') {
+      console.log('creating ticket')
+      serviceNow.createIncidentTicket()
+    }
+    if(response.Type === 'SubscriptionConfirmation') {
+      console.log(response.SubscribeURL)
+      request(response.SubscribeURL, (error, response, body) => {
+        if(!error && response.statusCode === 200){
+          console.log('Subscription has been confirmed.')
+        }
+      })
+    }
+  });
+})
+
+app.listen(localPort, () => {
+  console.log('Server is on port ' + localPort)
+  const attemptedTunnel = localtunnel(localPort, {subdomain: 'cloudmonitoring'}, (err, successfulTunnel) => {
+    if (err){
+      console.log('Unable to create tunnel.')
+    }
+    console.log(successfulTunnel.url);
+  });
+  attemptedTunnel.on('close', () => {
+    console.log('URL has closed.');
+  });
+})
