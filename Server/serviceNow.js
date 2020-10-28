@@ -42,7 +42,5 @@ function createIncidentTicket () {
             console.log("==================== ERROR ====================", error);
         })
 }
-//pullIncidentTable()
-//createIncidentTicket()
 
 module.exports = {pullIncidentTable, createIncidentTicket}
