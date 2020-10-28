@@ -51,7 +51,7 @@ app.post('/', (req, res) => {
   });
 })
 
-app.listen(localPort, () => {
+const server = app.listen(localPort, () => {
   console.log('Server is on port ' + localPort)
   const attemptedTunnel = localtunnel(localPort, {subdomain: 'cloudmonitoring'}, (err, successfulTunnel) => {
     if (err){
@@ -63,3 +63,12 @@ app.listen(localPort, () => {
     console.log('URL has closed.');
   });
 })
+
+process.on('SIGTERM', shutDown);
+process.on('SIGINT', shutDown);
+
+function shutDown() {
+  console.log('\nReceived kill signal, shutting down server.');
+  server.close();
+  process.exit();
+}
