@@ -33,7 +33,7 @@ function createIncidentTicket () {
                 'Authorization': 'Basic ' + btoa(user + ':' + pwd),
             },
             data: {
-                'short_description': 'aws is down'
+                'short_description': 'Alarm is going off - demo for Chandra'
             }
         }).then((response) => {
             console.log(response)

@@ -1,9 +1,10 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const request = require('request')
-const serviceNow = require('./serviceNow')
-const app = express()
-const port = 8080
+const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request');
+const serviceNow = require('./serviceNow');
+const localtunnel = require('localtunnel');
+const app = express();
+const localPort = 8080;
 
 app.use(bodyParser.urlencoded({ extended: false}))
 
@@ -50,6 +51,15 @@ app.post('/', (req, res) => {
   });
 })
 
-app.listen(port, () => {
-  console.log('Server is on port ' + port)
+app.listen(localPort, () => {
+  console.log('Server is on port ' + localPort)
+  const attemptedTunnel = localtunnel(localPort, {subdomain: 'cloudmonitoring'}, (err, successfulTunnel) => {
+    if (err){
+      console.log('Unable to create tunnel.')
+    }
+    console.log(successfulTunnel.url);
+  });
+  attemptedTunnel.on('close', () => {
+    console.log('URL has closed.');
+  });
 })
