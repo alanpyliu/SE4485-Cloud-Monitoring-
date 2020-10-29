@@ -55,7 +55,7 @@ const server = app.listen(localPort, () => {
   console.log('Server is on port ' + localPort)
 })
 
-const attemptedTunnel = localtunnel(localPort, { subdomain: 'test' }, (err, successfulTunnel) => {
+const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485cloudmonitoring' }, (err, successfulTunnel) => {
   if (err) {
     console.log('Unable to create tunnel.')
     process.exit(1);
@@ -63,16 +63,20 @@ const attemptedTunnel = localtunnel(localPort, { subdomain: 'test' }, (err, succ
   console.log(successfulTunnel.url);
 });
 
-process.on('SIGTERM', shutDown(1));
-process.on('SIGINT', shutDown(2));
+process.on('SIGTERM', shutDown);
+process.on('SIGINT', shutDown);
 
 function shutDown(signal) {
   console.log('\nReceived kill signal ' + signal + ', shutting down server.');
-  attemptedTunnel.close(() => {
-    console.log('URL has closed.');
-    server.close(() => {
-      console.log('Local server has been stopped.')
-      process.exit(0);
-    });
-  });
+  attemptedTunnel.close()
 }
+
+attemptedTunnel.on('close', () => {
+  console.log('URL has closed.');
+  server.close();
+})
+
+server.on('close', () => {
+  console.log('Local server has been stopped.')
+  process.exit(0);
+})
