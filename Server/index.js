@@ -6,18 +6,18 @@ const localtunnel = require('localtunnel');
 const app = express();
 const localPort = 8080;
 
-app.use(bodyParser.urlencoded({ extended: false}))
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', (req, res) => {
   console.log('Received get request')
-  
-  let data='';
+
+  let data = '';
   req.setEncoding('utf8');
-  req.on('data', function(chunk) { 
-     data += chunk;
+  req.on('data', function (chunk) {
+    data += chunk;
   });
 
-  req.on('end', function() {
+  req.on('end', function () {
     let response = JSON.parse(data)
     console.log(response)
   });
@@ -25,25 +25,25 @@ app.get('/', (req, res) => {
 
 app.post('/', (req, res) => {
   console.log('Received post request')
-  
-  let data='';
+
+  let data = '';
   req.setEncoding('utf8');
-  req.on('data', function(chunk) { 
-     data += chunk;
+  req.on('data', function (chunk) {
+    data += chunk;
   });
 
-  req.on('end', function() {
+  req.on('end', function () {
     let response = JSON.parse(data)
     console.log(response)
 
-    if(response.NewStateValue === 'ALARM') {
+    if (response.NewStateValue === 'ALARM') {
       console.log('creating ticket')
       serviceNow.createIncidentTicket()
     }
-    if(response.Type === 'SubscriptionConfirmation') {
+    if (response.Type === 'SubscriptionConfirmation') {
       console.log(response.SubscribeURL)
       request(response.SubscribeURL, (error, response, body) => {
-        if(!error && response.statusCode === 200){
+        if (!error && response.statusCode === 200) {
           console.log('Subscription has been confirmed.')
         }
       })
@@ -51,15 +51,28 @@ app.post('/', (req, res) => {
   });
 })
 
-app.listen(localPort, () => {
+const server = app.listen(localPort, () => {
   console.log('Server is on port ' + localPort)
-  const attemptedTunnel = localtunnel(localPort, {subdomain: 'cloudmonitoring'}, (err, successfulTunnel) => {
-    if (err){
-      console.log('Unable to create tunnel.')
-    }
-    console.log(successfulTunnel.url);
-  });
-  attemptedTunnel.on('close', () => {
-    console.log('URL has closed.');
-  });
 })
+
+const attemptedTunnel = localtunnel(localPort, { subdomain: 'test' }, (err, successfulTunnel) => {
+  if (err) {
+    console.log('Unable to create tunnel.')
+    process.exit(1);
+  }
+  console.log(successfulTunnel.url);
+});
+
+process.on('SIGTERM', shutDown(1));
+process.on('SIGINT', shutDown(2));
+
+function shutDown(signal) {
+  console.log('\nReceived kill signal ' + signal + ', shutting down server.');
+  attemptedTunnel.close(() => {
+    console.log('URL has closed.');
+    server.close(() => {
+      console.log('Local server has been stopped.')
+      process.exit(0);
+    });
+  });
+}
