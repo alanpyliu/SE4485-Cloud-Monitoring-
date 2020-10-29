@@ -1,10 +1,10 @@
 const axios = require('axios');
-const geturl = 'https://dev99907.service-now.com/api/now/table/incident?sysparm_limit=1';
-const url = 'https://dev99907.service-now.com/api/now/table/incident';
+const geturl = 'https://dev19421.service-now.com/api/now/table/incident?sysparm_limit=1';
+const url = 'https://dev19421.service-now.com/api/now/table/incident';
 const btoa = require('btoa');
 
 const user = 'admin'
-const pwd = 'Summer2020'
+const pwd = 'Summer2020@#'
 
 function pullIncidentTable () {
     axios.get(geturl,
@@ -33,7 +33,7 @@ function createIncidentTicket () {
                 'Authorization': 'Basic ' + btoa(user + ':' + pwd),
             },
             data: {
-                'short_description': 'Alarm is going off - demo for Chandra'
+                'short_description': 'Alarm is going off! Excess CPU Usage.'
             }
         }).then((response) => {
             console.log(response)
