@@ -7,6 +7,8 @@ const app = express();
 const localPort = 8080;
 app.use(bodyParser.urlencoded({ extended: false }))
 
+let previousAlarmID = '';
+
 //handler for receiving get request
 app.get('/', (req, res) => {
   console.log('Received get request');
@@ -37,7 +39,8 @@ app.post('/', (req, res) => {
     let response = JSON.parse(data);
     console.log(response);
 
-    if (response.NewStateValue === 'ALARM') {
+    if (response.MessageId !== previousAlarmID && response.Subject.includes('ALARM')) {
+      previousAlarm = response.MessageId;
       console.log('creating ticket');
       serviceNow.createIncidentTicket();
     }
