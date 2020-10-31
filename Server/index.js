@@ -15,11 +15,11 @@ app.get('/', (req, res) => {
 
   let data = '';
   req.setEncoding('utf8');
-  req.on('data', function (chunk) {
+  req.on('data', (chunk) => {
     data += chunk;
   });
 
-  req.on('end', function () {
+  req.on('end', () => {
     let response = JSON.parse(data);
     console.log(response);
   });
@@ -31,17 +31,19 @@ app.post('/', (req, res) => {
 
   let data = '';
   req.setEncoding('utf8');
-  req.on('data', function (chunk) {
+  req.on('data', (chunk) => {
     data += chunk;
   });
 
-  req.on('end', function () {
+  req.on('end', () => {
     let response = JSON.parse(data);
     console.log(response);
 
-    if (response.MessageId !== previousAlarmID && response.Subject.includes('ALARM')) {
-      previousAlarm = response.MessageId;
-      console.log('creating ticket');
+    if (response.MessageId.localeCompare(previousAlarmID) && response.Subject.includes('ALARM')) {
+      console.log(previousAlarmID);
+      console.log(response.MessageId);
+      previousAlarmID = response.MessageId;
+      console.log('Creating Servicenow ticket');
       serviceNow.createIncidentTicket();
     }
     if (response.Type === 'SubscriptionConfirmation') {
@@ -73,7 +75,7 @@ const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485cloudmonitori
 process.on('SIGTERM', shutDown);
 process.on('SIGINT', shutDown);
 
-function shutDown(signal) {
+function shutDown (signal) {
   console.log('\nReceived kill signal ' + signal + ', shutting down server.');
   attemptedTunnel.close();
 }

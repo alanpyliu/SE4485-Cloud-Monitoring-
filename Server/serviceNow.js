@@ -3,10 +3,10 @@ const geturl = 'https://dev19421.service-now.com/api/now/table/incident?sysparm_
 const url = 'https://dev19421.service-now.com/api/now/table/incident';
 const btoa = require('btoa');
 
-const user = 'admin'
-const pwd = 'Summer2020@#'
+const user = 'admin';
+const pwd = 'Summer2020@#';
 
-function pullIncidentTable () {
+let pullIncidentTable = () => {
     axios.get(geturl,
         {
             headers: {
@@ -15,14 +15,14 @@ function pullIncidentTable () {
                 'Authorization': 'Basic ' + Buffer.from(user + ':' + pwd)
             }
         }).then((response) => {
-            console.log(response)
+            console.log(response);
         })
         .catch((error) => {
             console.log("==================== ERROR ====================", error);
         })
 }
 
-function createIncidentTicket () {
+let createIncidentTicket = () => {
     axios(url,
         {
             method: 'POST',
@@ -36,13 +36,11 @@ function createIncidentTicket () {
                 'short_description': 'Alarm is going off! Excess CPU Usage.'
             }
         }).then((response) => {
-            console.log(response)
+            console.log(response);
         })
         .catch((error) => {
             console.log("==================== ERROR ====================", error);
         })
 }
-//pullIncidentTable()
-//createIncidentTicket()
 
-module.exports = {pullIncidentTable, createIncidentTicket}
+module.exports = {pullIncidentTable, createIncidentTicket};
