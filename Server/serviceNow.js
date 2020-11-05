@@ -22,7 +22,8 @@ let pullIncidentTable = () => {
         })
 }
 
-let createIncidentTicket = () => {
+let createIncidentTicket = (isGCP = false) => {
+    let desc = isGCP ? 'Alarm is going off for GCP instance! Excess CPU Usage.' : 'Alarm is going off for AWS instance! Excess CPU Usage.';
     axios(url,
         {
             method: 'POST',
@@ -33,7 +34,7 @@ let createIncidentTicket = () => {
                 'Authorization': 'Basic ' + btoa(user + ':' + pwd),
             },
             data: {
-                'short_description': 'Alarm is going off! Excess CPU Usage.'
+                'short_description': desc
             }
         }).then((response) => {
             console.log(response);
