@@ -7,7 +7,7 @@ const app = express();
 const localPort = 8080;
 app.use(bodyParser.urlencoded({ extended: false }))
 
-let previousAlarmID = '';
+let previousAWSID = '', previousGCPID = '';
 
 //handler for receiving get request
 app.get('/', (req, res) => {
@@ -15,11 +15,11 @@ app.get('/', (req, res) => {
 
   let data = '';
   req.setEncoding('utf8');
-  req.on('data', function (chunk) {
+  req.on('data', (chunk) => {
     data += chunk;
   });
 
-  req.on('end', function () {
+  req.on('end', () => {
     let response = JSON.parse(data);
     console.log(response);
   });
@@ -31,27 +31,41 @@ app.post('/', (req, res) => {
 
   let data = '';
   req.setEncoding('utf8');
-  req.on('data', function (chunk) {
+  req.on('data', (chunk) => {
     data += chunk;
   });
 
-  req.on('end', function () {
+  req.on('end', () => {
     let response = JSON.parse(data);
     console.log(response);
 
-    if (response.MessageId !== previousAlarmID && response.Subject.includes('ALARM')) {
-      previousAlarm = response.MessageId;
-      console.log('creating ticket');
-      serviceNow.createIncidentTicket();
-    }
-    if (response.Type === 'SubscriptionConfirmation') {
-      console.log(response.SubscribeURL);
-      request(response.SubscribeURL, (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          console.log('Subscription has been confirmed.');
+    // Checks if the alarm is from GCP or AWS
+    if(response.incident !== undefined) {    // GCP
+      if(response.incident.incident_id !== previousGCPID && response.incident.policy_name === 'CPU-Alarm') {
+        previousGCPID = response.incident.incident_id;
+        console.log('Creating Servicenow ticket');
+        serviceNow.createIncidentTicket(true);
+      }
+    } else if(response.Type !== undefined) {                                                            // AWS
+      if (response.Type === 'SubscriptionConfirmation') {
+        console.log(response.SubscribeURL);
+        request(response.SubscribeURL, (error, response) => {
+          if (!error && response.statusCode === 200) {
+            console.log('Subscription has been confirmed.');
+          }
+        })
+      }
+      // Alarm
+      if(response.Type === 'Notification'){
+        if (response.MessageId !== previousAWSID && response.Subject.includes('ALARM')) {
+          previousAWSID = response.MessageId;
+          console.log('Creating Servicenow ticket');
+          serviceNow.createIncidentTicket();
         }
-      })
+      }
+      
     }
+
   });
 })
 
@@ -61,7 +75,7 @@ const server = app.listen(localPort, () => {
 })
 
 //create a tunnel from the local port to a https public domain
-const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485cloudmonitoring' }, (err, successfulTunnel) => {
+const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485-gr2' }, (err, successfulTunnel) => {
   if (err) {
     console.log('Unable to create tunnel.')
     process.exit(1);
@@ -72,8 +86,11 @@ const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485cloudmonitori
 //graceful handling of ending the server, will output appropriate messages
 process.on('SIGTERM', shutDown);
 process.on('SIGINT', shutDown);
+process.on('uncaughtException', shutDown);
+process.on('unhandledRejection', shutDown);
+process.on('exit', shutDown);
 
-function shutDown(signal) {
+function shutDown (signal) {
   console.log('\nReceived kill signal ' + signal + ', shutting down server.');
   attemptedTunnel.close();
 }
