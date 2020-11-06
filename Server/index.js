@@ -46,7 +46,7 @@ app.post('/', (req, res) => {
         console.log('Creating Servicenow ticket');
         serviceNow.createIncidentTicket(true);
       }
-    } else if(response.Type !== undefined) {                                                            // AWS
+    } else if(response.Type !== undefined) {    // AWS
       if (response.Type === 'SubscriptionConfirmation') {
         console.log(response.SubscribeURL);
         request(response.SubscribeURL, (error, response) => {
@@ -74,8 +74,8 @@ const server = app.listen(localPort, () => {
   console.log('Server is on port ' + localPort);
 })
 
-//create a tunnel from the local port to a https public domain
-const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485-gr2' }, (err, successfulTunnel) => {
+//create a tunnel from the local port to a https public domain -- subdomains ('se4485-gr2'/'se4485cloudmonitoring'/'se4485-cloudmonitoring')
+const attemptedTunnel = localtunnel(localPort, { subdomain: 'se4485cloudmonitoring' }, (err, successfulTunnel) => {
   if (err) {
     console.log('Unable to create tunnel.')
     process.exit(1);
