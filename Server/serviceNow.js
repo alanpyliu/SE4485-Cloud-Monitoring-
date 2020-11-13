@@ -1,10 +1,12 @@
 const axios = require('axios');
-const geturl = 'https://dev19421.service-now.com/api/now/table/incident?sysparm_limit=1';
-const url = 'https://dev19421.service-now.com/api/now/table/incident';
+const instanceNum = '99907'
+const geturl = 'https://dev' + instanceNum + '.service-now.com/api/now/table/incident?sysparm_limit=1';
+const url = 'https://dev' + instanceNum + '.service-now.com/api/now/table/incident';
 const btoa = require('btoa');
 
 const user = 'admin';
-const pwd = 'Summer2020@#';
+// const pwd = 'Summer2020@#';
+const pwd = 'Summer2020';
 
 let pullIncidentTable = () => {
     axios.get(geturl,
@@ -44,4 +46,4 @@ let createIncidentTicket = (isGCP = false) => {
         })
 }
 
-module.exports = {pullIncidentTable, createIncidentTicket};
+module.exports = { pullIncidentTable, createIncidentTicket };
